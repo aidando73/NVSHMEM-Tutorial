@@ -16,7 +16,8 @@ DeepEP (by DeepSeek) is a high‑performance communication library for MoE and E
 ## Install
 ```bash
 # Editable install of the CUDA extension + Python package
-pip install -e .
+cd /workspace/fireworks-attention-practice/NVSHMEM-Tutorial &&
+NVSHMEM_LIBRARY_PATH=/usr/lib/aarch64-linux-gnu/nvshmem/12/ NVSHMEM_INCLUDE_PATH=/usr/include/nvshmem_12/  pip install -e . --break-system-packages
 ```
 
 
@@ -31,7 +32,15 @@ Inter‑node runs follow the same pattern but require proper rendezvous environm
 You can also use the convenience scripts in `scripts/`:
 ```bash
 bash scripts/run_intranode_nvshmem.sh 2
-bash scripts/run_internode_nvshmem.sh 0 # set rendezvous env first
+bash scripts/run_intranode_nvshmem.sh 0
+
+pkill -9 -f torchrun || true && torchrun \
+    --nproc_per_node=4 \
+    --nnodes=1 \
+    --node_rank=0 \
+    --master_addr=localhost \
+    --master_port=29502 \
+    tests/test_internode_nvshmem.py
 ```
 
 

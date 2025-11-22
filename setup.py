@@ -16,24 +16,26 @@ def get_cuda_root():
 
 cuda_root = get_cuda_root()
 nvshmem_home = os.environ.get("NVSHMEM_HOME", "/opt/nvshmem")
+nvshmem_include_path = os.environ.get("NVSHMEM_INCLUDE_PATH", os.path.join(nvshmem_home, "include"))
+nvshmem_library_path = os.environ.get("NVSHMEM_LIBRARY_PATH", os.path.join(nvshmem_home, "lib"))
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 include_dirs = [
     os.path.join(current_dir, "csrc"),  # Add csrc directory to include path
-    os.path.join(nvshmem_home, "include"),
+    nvshmem_include_path,
     os.path.join(cuda_root, "include"),
 ]
 
 library_dirs = [
-    os.path.join(nvshmem_home, "lib"),
+    nvshmem_library_path,
     "/lib/x86_64-linux-gnu/",
 ]
 
-nvcc_dlink = ["-dlink", f"-L{nvshmem_home}/lib", "-lnvshmem_device"]
+nvcc_dlink = ["-dlink", f"-L{nvshmem_library_path}", "-lnvshmem_device"]
 extra_link_args = [
     f"-l:libnvshmem_host.so",
     "-l:libnvshmem_device.a",
-    f"-Wl,-rpath,{nvshmem_home}/lib",
+    f"-Wl,-rpath,{nvshmem_library_path}",
     f"-L/lib/x86_64-linux-gnu/",
     "-lcuda",  # Add this line to link CUDA driver library
     "-lcudart",
